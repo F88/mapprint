@@ -86,8 +86,8 @@ jobs:
       - run:
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-                # git config --global user.email msn088g@gmail.com 
-                # git config --global user.name circleci
+                git config --global user.email msn088g@gmail.com 
+                git config --global user.name circleci
               git fetch origin gh-pages
               bundle exec middleman deploy
             fi
