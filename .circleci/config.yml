@@ -53,7 +53,7 @@ jobs:
             npm --version
 
       # Make sure all dependencies in your Gemfile are available. 
-      - *restore_bundled_gems
+      - *restore_dependency_gems
       - run: bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
           key: *bundler_cache_key
@@ -106,6 +106,8 @@ workflows:
             branches:
               only:
                 - develop
+    jobs:
+      - build
   deploy:
     jobs:
       - build
