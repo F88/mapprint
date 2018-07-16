@@ -1,26 +1,47 @@
-# Ruby CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details
-#
 version: 2
-jobs:
-  build:
-    parallelism: 3 
-    working_directory: ~/repos 
-    environment:
-      BUNDLE_PATH: vendor/bundle
+
+references:
+
+  container_config: &container_config
     docker:
       - image: circleci/ruby:2.4-node
-        environment: # environment variables for primary container
+        environment:
           BUNDLE_JOBS: 3
           BUNDLE_RETRY: 3
           BUNDLE_PATH: ${BUNDLE_PATH}
+    working_directory: ~/repos
+
+  bundler_cache_key: &bundler_cache_key
+    dependency_gems-{{ checksum "Gemfile.lock" }}
+  bundler_backup_cache_key: &bundler_backup_cache_key
+    dependency_gems
+  restore_dependency_gems: &restore_dependency_gems
+    restore_cache:
+      keys:
+        - *bundler_cache_key
+        - *bundler_backup_cache_key
+
+  npm_cache_key: &npm_cache_key
+    dependency-npm-{{ checksum "package.json" }}
+  npm_backup_cache_key: &npm_backup_cache_key
+    dependency-npm
+  restore_node_modules: &restore_node_modules
+    restore_cache:
+      keys:
+        - *npm_cache_key
+        - *npm_backup_cache_key
+
+jobs:
+  build:
+    <<: *container_config
+    working_directory: ~/repos 
+    environment:
+      BUNDLE_PATH: vendor/bundle
     branches:
       ignore:
         - gh-pages
-    steps: # a collection of executable commands
-
-      - checkout # special step to check out source code to working directory
+    steps:
+      - checkout
 
       # Show environment
       - run:
@@ -32,24 +53,18 @@ jobs:
             npm --version
 
       # Make sure all dependencies in your Gemfile are available. 
-      - restore_cache:
-          keys:
-            - gems-{{ checksum "Gemfile.lock" }}
-            - gems-
+      - *restore_bundled_gems
       - run: bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
-          key: gems-{{ checksum "Gemfile.lock" }}
+          key: *bundler_cache_key
           paths:
             - ${BUNDLE_PATH}
 
       # Make sure all dependencies in your package.json are available. 
-      - restore_cache:
-          keys:
-            - node_modules-{{ checksum "package.json" }}
-            - node_modules-
+      - *restore_node_modules
       - run: npm install
       - save_cache:
-          key: node_modules-{{ checksum "package.json" }}
+          key: *npm_cache_key
           paths:
             - node_modules
 
@@ -64,25 +79,39 @@ jobs:
           command: bundle exec middleman build
           when: on_success
 
-      # Deploy a site
-      # - deploy:
-      #     name: start master deploy
-      #     command: |
-      #       if [ "${CIRCLE_BRANCH}" == "master" ]; then
-      #           git config --global user.email msn088g@gmail.com 
-      #           git config --global user.name circleci
-      #           git fetch origin gh-pages
-      #           bundle exec middleman deploy
-      #       fi
+  # Deploy a site
+  deploy-prod:
+    <<: *container_config
+    working_directory: ~/repos 
+    steps:
+      - run:
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+                # git config --global user.email msn088g@gmail.com 
+                # git config --global user.name circleci
+              git fetch origin gh-pages
+              bundle exec middleman deploy
+            fi
 
       # # Add SSH keys from a project’s settings to a container
       # - add_ssh_keys
 
-
-      - store_test_results:
-          path: test-results
-
-
-
-    # workflows:
-    #   version: 2
+workflows:
+  version: 2
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - develop
+  deploy:
+    jobs:
+      - build
+      - deploy-prod:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
