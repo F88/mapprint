@@ -1,62 +1,67 @@
-version: 2 # use CircleCI 2.0
-jobs: # a collection of steps
-  build: # runs not using Workflows must have a `build` job as entry point
-    branches:
-      ignore:
-        - gh-pages
-    working_directory: ~/mapprint # directory where steps will run
-    docker: # run the steps with Docker
-      - image: circleci/ruby:2.4-node # ...with this image as the primary container; this is where all `steps` will run
+# Ruby CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-ruby/ for more details
+#
+version: 2
+jobs:
+  build:
+    parallelism: 3 
+    working_directory: ~/mapprint 
+    environment:
+      BUNDLE_PATH: vendor/bundle
+    docker:
+      - image: circleci/ruby:2.4-node
         environment: # environment variables for primary container
           BUNDLE_JOBS: 3
           BUNDLE_RETRY: 3
-          BUNDLE_PATH: vendor/bundle
+          BUNDLE_PATH: ${BUNDLE_PATH}
+    branches:
+      ignore:
+        - gh-pages
     steps: # a collection of executable commands
+
       - checkout # special step to check out source code to working directory
 
-      # Which version of bundler?
-      - run:
-          name: Which bundler?
-          command: bundle -v
+      # Show environment
+      - run: ruby --version 
+      - run: bundle --version
+      - run: node --version
+      - run: npm --version
 
-      # Restore bundle cache
+      # Make sure all dependencies in your Gemfile are available. 
       - restore_cache:
           keys:
-            - bundle-v2-{{ checksum "Gemfile.lock" }}
-            - bundle-v2-
-
-      - run:
-          name: Bundle Install
-          command: bundle check || bundle install
-
-      # Store bundle cache
+            - gems-{{ checksum "Gemfile.lock" }}
+            - gems-
+      - run: bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
-          key: bundle-v2-{{ checksum "Gemfile.lock" }}
+          key: gems-{{ checksum "Gemfile.lock" }}
           paths:
-            - vendor/bundle
+            - ${BUNDLE_PATH}
 
-      # Only necessary if app uses webpacker or yarn in some other way
+      # Make sure all dependencies in your package.json are available. 
       - restore_cache:
           keys:
-            - npm-{{ checksum "package.json" }}
-            - npm-
-
-      - run:
-          name: npm Install
-          command: npm install
-          
-      # Store npm cache
+            - node_modules-{{ checksum "package.json" }}
+            - node_modules-
+      - run: npm install
       - save_cache:
-          key: npm-{{ checksum "package.json" }}
+          key: node_modules-{{ checksum "package.json" }}
           paths:
             - node_modules
-          
 
-      - run: npm run lint
+      # Run tests
       - run: npm test
-      - run: bundle exec middleman build
 
-            # - add_ssh_keys
+      # Run lints
+      - run: npm run lint
+
+      # Build a site
+      - run: 
+          command: bundle exec middleman build
+          when: on_success
+
+      # Deploy a site
       # - deploy:
       #     name: start master deploy
       #     command: |
@@ -66,5 +71,10 @@ jobs: # a collection of steps
       #           git fetch origin gh-pages
       #           bundle exec middleman deploy
       #       fi
-# workflows:
-#   version: 2
+
+      # Add SSH keys from a project’s settings to a container
+      - add_ssh_keys
+
+
+    # workflows:
+    #   version: 2

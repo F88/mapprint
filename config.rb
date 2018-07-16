@@ -58,6 +58,11 @@ page '/*.txt', layout: false
 
 activate :livereload
 
+configure :test do
+  npm run lint
+  npm test 
+end
+
 configure :build do
   activate :asset_host, :host => "/mapprint"
   ignore /stylesheets\/.*\.scss/
@@ -68,7 +73,7 @@ end
 activate :deploy do |deploy|
   deploy.build_before = true
   deploy.deploy_method = :git
-  deploy.remote = 'git@github.com:codeforjapan/mapprint.git'
+  # deploy.remote = 'git@github.com:F88/mapprint.git'
   deploy.branch = 'gh-pages'
   deploy.commit_message = "[ci skip] Automated commit at #{Time.now.utc} by middleman-deploy #{Middleman::Deploy::PACKAGE} #{Middleman::Deploy::VERSION}"
 end

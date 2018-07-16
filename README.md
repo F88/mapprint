@@ -22,6 +22,8 @@ https://codeforjapan.github.io/mapprint/
 Issues にあるいろいろな修正にご協力いただけると嬉しいです。
 詳しくは[こちら](./CONTRIBUTE.md)
 
+
+
 ## 開発環境の構築方法
 
 ### Requirement
@@ -35,24 +37,32 @@ Issues にあるいろいろな修正にご協力いただけると嬉しいで�
 ### 環境構築
 
 ```
-git clone git@github.com:codeforjapan/mapprint.git
-cd mapprint
-npm install
-bundle install --path=vendor/bundle
-bundle exec middleman build
+$ git clone git@github.com:codeforjapan/mapprint.git
+$ cd mapprint
+$ npm install
+$ bundle install --path=vendor/bundle
+$ bundle exec middleman build
+```
+
+### テスト
+
+```
+$ npm run lint
+$ npm test
 ```
 
 ### 起動
 
 ```
-bundle exec middleman server
+$ bundle exec middleman server
 ```
 http://localhost:4567 で見れるはず
 
+参考
 
-### deploy
+### デプロイ
 ```
-bundle exec middleman deploy
+$ bundle exec middleman deploy
 ```
 
 (このリポジトリへの push 権限が必要。
@@ -60,7 +70,42 @@ github pages で作られているので、gh-pages ブランチが更新され�
 
 
 
-### test
+
+
+
+
+## CI/CD
+
+Runnable only macOS and Linux Distros
+
+[Using the CircleCI Local CLI \- CircleCI](https://circleci.com/docs/2.0/local-cli/)
+
+### 設定ファイルのテスト
+
 ```
-npm test
+$ circleci config --verbose validate -c .circleci/config.yml
 ```
+
+### ローカルビルド
+
+Dockerがインストールされて利用出来る状態であればローカルで実行してみることも出来ます。
+
+**現在動作しません**
+
+```
+# $ circleci build
+```
+
+
+
+## 参考
+
+- [Middleman: 作業を効率化するフロントエンド開発ツール](https://middlemanapp.com/jp/)
+  - [Middleman: The Development Cycle](https://middlemanapp.com/basics/development-cycle/)
+  - [Middleman: Build & Deploy](https://middlemanapp.com/basics/build-and-deploy/)
+- [Middleman: Hand\-crafted frontend development](https://middlemanapp.com/)
+  - [Middleman: 開発サイクル](https://middlemanapp.com/jp/basics/development-cycle/)
+  - [Middleman: ビルド & デプロイ](https://middlemanapp.com/jp/basics/build-and-deploy/)
+
+
+
