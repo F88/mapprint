@@ -6,7 +6,7 @@ version: 2
 jobs:
   build:
     parallelism: 3 
-    working_directory: ~/mapprint 
+    working_directory: ~/repos 
     environment:
       BUNDLE_PATH: vendor/bundle
     docker:
@@ -75,8 +75,13 @@ jobs:
       #           bundle exec middleman deploy
       #       fi
 
-      # Add SSH keys from a project’s settings to a container
-      - add_ssh_keys
+      # # Add SSH keys from a project’s settings to a container
+      # - add_ssh_keys
+
+
+      - store_test_results:
+          path: test-results
+
 
 
     # workflows:

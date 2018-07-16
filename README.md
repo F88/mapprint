@@ -97,6 +97,9 @@ Dockerがインストールされて利用出来る状態であればローカ�
 ```
 
 
+master: [![CircleCI](https://circleci.com/gh/F88/mapprint/tree/master.svg?style=svg)](https://circleci.com/gh/F88/mapprint/tree/master)
+develop: [![CircleCI](https://circleci.com/gh/F88/mapprint/tree/develop.svg?style=svg)](https://circleci.com/gh/F88/mapprint/tree/develop)
+
 
 ## 参考
 
