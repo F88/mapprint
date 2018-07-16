@@ -78,42 +78,42 @@ jobs:
           command: bundle exec middleman build
           when: on_success
 
-  # Deploy a site
-  deploy-prod:
-    <<: *container_config
-    working_directory: ~/repos 
-    steps:
-      - run:
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-                git config --global user.email msn088g@gmail.com 
-                git config --global user.name circleci
-              git fetch origin gh-pages
-              bundle exec middleman deploy
-            fi
+  # # Deploy a site
+  # deploy-prod:
+  #   <<: *container_config
+  #   working_directory: ~/repos 
+  #   steps:
+  #     - run:
+  #         command: |
+  #           if [ "${CIRCLE_BRANCH}" == "master" ]; then
+  #               git config --global user.email msn088g@gmail.com 
+  #               git config --global user.name circleci
+  #             git fetch origin gh-pages
+  #             bundle exec middleman deploy
+  #           fi
 
-      # # Add SSH keys from a project’s settings to a container
-      # - add_ssh_keys
+  #     # # Add SSH keys from a project’s settings to a container
+  #     # - add_ssh_keys
 
-workflows:
-  version: 2
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"
-          filters:
-            branches:
-              only:
-                - develop
-    jobs:
-      - build
-  deploy:
-    jobs:
-      - build
-      - deploy-prod:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
+# workflows:
+#   version: 2
+#   nightly:
+#     triggers:
+#       - schedule:
+#           cron: "0 0 * * *"
+#           filters:
+#             branches:
+#               only:
+#                 - develop
+#     jobs:
+#       - build
+#   deploy:
+#     jobs:
+#       - build
+#       - deploy-prod:
+#           requires:
+#             - build
+#           filters:
+#             branches:
+#               only: master
 
