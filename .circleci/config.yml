@@ -8,7 +8,6 @@ references:
         environment:
           BUNDLE_JOBS: 3
           BUNDLE_RETRY: 3
-          BUNDLE_PATH: ${BUNDLE_PATH}
     working_directory: ~/repos
 
   bundler_cache_key: &bundler_cache_key
@@ -54,7 +53,7 @@ jobs:
 
       # Make sure all dependencies in your Gemfile are available. 
       - *restore_dependency_gems
-      - run: bundle check || bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run: bundle check || bundle install --jobs=4 --retry=3 --path ${BUNDLE_PATH}
       - save_cache:
           key: *bundler_cache_key
           paths:
