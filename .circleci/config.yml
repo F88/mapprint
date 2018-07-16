@@ -52,23 +52,19 @@ jobs: # a collection of steps
             - node_modules
           
 
-      - run:
-          name: build middleman
-          command: |
-            bundle exec middleman build
+      - run: npm run lint
+      - run: npm test
+      - run: bundle exec middleman build
 
-      - run:
-          name: run test
-          command: |
-            npm test
-
-      - add_ssh_keys
-      - deploy:
-          name: start master deploy
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-                git config --global user.email info@code4japan.org
-                git config --global user.name circleci
-                git fetch origin gh-pages
-                bundle exec middleman deploy
-            fi
+            # - add_ssh_keys
+      # - deploy:
+      #     name: start master deploy
+      #     command: |
+      #       if [ "${CIRCLE_BRANCH}" == "master" ]; then
+      #           git config --global user.email msn088g@gmail.com 
+      #           git config --global user.name circleci
+      #           git fetch origin gh-pages
+      #           bundle exec middleman deploy
+      #       fi
+# workflows:
+#   version: 2
